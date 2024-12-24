@@ -1,0 +1,175 @@
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffebcd;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        h1 {
+            color: #ff4500;
+            margin-bottom: 20px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            border: 2px solid #000;
+            transition: background-color 0.3s;
+        }
+        .cell:hover {
+            background-color: #add8e6;
+        }
+        .hidden {
+            display: none;
+        }
+        .winner {
+            font-size: 2em;
+            margin-top: 20px;
+            color: green;
+        }
+        .scoreboard {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <div class="board" id="board">
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+        <div class="cell" data-cell></div>
+    </div>
+    <div class="winner hidden" id="winnerMessage">
+        🎉 <span id="winnerText"></span> wins! 🎉
+    </div>
+    <div class="scoreboard">
+        🦄 Wins: <span id="unicornWins">0</span> | 🐉 Wins: <span id="dragonWins">0</span> | Draws: <span id="draws">0</span>
+    </div>
+    <script>
+        const X_CLASS = '🦄';
+        const O_CLASS = '🐉';
+        const cellElements = document.querySelectorAll('[data-cell]');
+        const board = document.getElementById('board');
+        const winnerMessageElement = document.getElementById('winnerMessage');
+        const winnerTextElement = document.getElementById('winnerText');
+        const unicornWinsElement = document.getElementById('unicornWins');
+        const dragonWinsElement = document.getElementById('dragonWins');
+        const drawsElement = document.getElementById('draws');
+        let oTurn;
+        let gameActive = true;
+        let unicornWins = 0;
+        let dragonWins = 0;
+        let draws = 0;
+ 
+        startGame();
+ 
+        function startGame() {
+            oTurn = false;
+            gameActive = true;
+            cellElements.forEach(cell => {
+                cell.classList.remove(X_CLASS);
+                cell.classList.remove(O_CLASS);
+                cell.innerText = '';
+                cell.removeEventListener('click', handleClick);
+                cell.addEventListener('click', handleClick, { once: true });
+            });
+            winnerMessageElement.classList.add('hidden');
+        }
+ 
+        function handleClick(e) {
+            if (!gameActive) return;
+            const cell = e.target;
+            const currentClass = oTurn ? O_CLASS : X_CLASS;
+            placeMark(cell, currentClass);
+            if (checkWin(currentClass)) {
+                endGame(false);
+            } else if (isDraw()) {
+                endGame(true);
+            } else {
+                swapTurns();
+            }
+        }
+ 
+        function endGame(draw) {
+            gameActive = false;
+            if (draw) {
+                winnerTextElement.innerText = 'It\'s a Draw!';
+                draws++;
+                drawsElement.innerText = draws;
+            } else {
+                winnerTextElement.innerText = `${oTurn ? "Dragon" : "Unicorn"}`;
+                if (oTurn) {
+                    dragonWins++;
+                    dragonWinsElement.innerText = dragonWins;
+                } else {
+                    unicornWins++;
+                    unicornWinsElement.innerText = unicornWins;
+                }
+            }
+            winnerMessageElement.classList.remove('hidden');
+            setTimeout(startGame, 3000);
+        }
+ 
+        function isDraw() {
+            return [...cellElements].every(cell => {
+                return cell.classList.contains(X_CLASS) || cell.classList.contains(O_CLASS);
+            });
+        }
+ 
+        function placeMark(cell, currentClass) {
+            cell.classList.add(currentClass);
+            cell.innerText = currentClass;
+        }
+ 
+        function swapTurns() {
+            oTurn = !oTurn;
+        }
+ 
+        function checkWin(currentClass) {
+            const WINNING_COMBINATIONS = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => {
+                    return cellElements[index].classList.contains(currentClass);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
