@@ -1,0 +1,193 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Loan Calculator</title> <style>body {
+ 
+font-family: Arial, sans-serif;
+ 
+background-color: #f4f4f4;
+ 
+display: flex;
+ 
+justify-content: center;
+ 
+align-items: center;
+ 
+height: 100vh;
+ 
+margin: 0;}.container {
+ 
+background-color: #fff;
+ 
+padding: 20px;
+ 
+border-radius: 8px;
+ 
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+ 
+width: 80%;
+ 
+max-width: 600px;
+ 
+overflow-y: auto;
+ 
+max-height: 90vh;}h2 {
+ 
+text-align: center;
+ 
+color: #333;}form {
+ 
+display: flex;
+ 
+flex-direction: column;}label {
+ 
+margin-bottom: 5px;
+ 
+color: #555;}input {
+ 
+margin-bottom: 15px;
+ 
+padding: 10px;
+ 
+border: 1px solid #ccc;
+ 
+border-radius: 4px;}button {
+ 
+padding: 10px;
+ 
+background-color: #28a745;
+ 
+color: #fff;
+ 
+border: none;
+ 
+border-radius: 4px;
+ 
+cursor: pointer;}button:hover {
+ 
+background-color: #218838;}table {
+ 
+width: 100%;
+ 
+border-collapse: collapse;
+ 
+margin-top: 20px;}th, td {
+ 
+border: 1px solid #ddd;
+ 
+padding: 8px;
+ 
+text-align: center;}th {
+ 
+background-color: #f2f2f2;}.summary {
+ 
+margin-top: 20px;
+ 
+padding: 10px;
+ 
+background-color: #f9f9f9;
+ 
+border: 1px solid #ddd;
+ 
+border-radius: 4px;} </style> </head> <body> <div class="container"><h2>Loan Calculator</h2><form id="loanForm">
+ 
+<label for="loanAmount">Total Loan Amount (in Rupees):</label>
+ 
+<input type="number" id="loanAmount" required>
+ 
+<label for="interestRate">Rate of Interest (Annual %):</label>
+ 
+<input type="number" step="0.01" id="interestRate" required>
+ 
+<label for="loanYears">Years of Payment:</label>
+ 
+<input type="number" id="loanYears" required>
+ 
+<button type="button" onclick="calculateLoan()">Calculate</button></form><div id="result"></div> </div> <script>function calculateLoan() {
+ 
+const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+ 
+const annualInterestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+ 
+const loanYears = parseInt(document.getElementById('loanYears').value);
+ 
+const monthlyInterestRate = annualInterestRate / 12;
+ 
+const numberOfPayments = loanYears * 12;
+ 
+let balance = loanAmount;
+ 
+let totalInterestPaid = 0;
+ 
+let totalPrincipalPaid = 0;
+ 
+let totalAdditionalPaid = 0;
+ 
+let actualMonths = 0;
+ 
+let resultHTML = '<table><tr><th>Month</th><th>Principal Paid</th><th>Interest Paid</th><th>Additional Payment</th><th>Balance</th></tr>';
+ 
+const emi = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+ 
+for (let month = 1; month <= numberOfPayments; month++) {
+ 
+const interestPaid = balance * monthlyInterestRate;
+ 
+let principalPaid = emi - interestPaid;
+ 
+const additionalPayment = parseFloat(document.getElementById(`additionalPayment${month}`)?.value) || 0;
+ 
+ if (balance - (principalPaid + additionalPayment) < 0) {
+ 
+  principalPaid = balance - additionalPayment;
+ 
+}
+ 
+ balance -= (principalPaid + additionalPayment);
+ 
+totalInterestPaid += interestPaid;
+ 
+totalPrincipalPaid += principalPaid;
+ 
+totalAdditionalPaid += additionalPayment;
+ 
+actualMonths = month;
+ 
+ resultHTML += `<tr>
+ 
+  <td>${month}</td>
+ 
+  <td>${principalPaid.toFixed(2)}</td>
+ 
+  <td>${interestPaid.toFixed(2)}</td>
+ 
+  <td><input type="number" id="additionalPayment${month}" value="${additionalPayment}" onchange="calculateLoan()"></td>
+ 
+  <td>${balance.toFixed(2)}</td>
+ 
+</tr>`;
+ 
+ if (balance <= 0) break;
+ 
+}
+ 
+const totalAmountPaid = loanAmount + totalInterestPaid + totalAdditionalPaid;
+ 
+const excessPercentage = ((totalAmountPaid - loanAmount) / loanAmount) * 100;
+ 
+resultHTML += '</table>';
+ 
+resultHTML += `<div class="summary">
+ 
+<p><strong>Loan Amount Borrowed:</strong> ${loanAmount.toFixed(2)} Rupees</p>
+ 
+<p><strong>Total Payment Done:</strong> ${totalAmountPaid.toFixed(2)} Rupees</p>
+ 
+<p><strong>Tenure Planned:</strong> ${loanYears} years</p>
+ 
+<p><strong>Tenure Taken to Close:</strong> ${(actualMonths / 12).toFixed(2)} years</p>
+ 
+<p><strong>Additional Amounts Paid:</strong> ${totalAdditionalPaid.toFixed(2)} Rupees</p>
+ 
+<p><strong>Excess Percentage Paid:</strong> ${excessPercentage.toFixed(2)}%</p>
+ 
+</div>`;
+ 
+document.getElementById('result').innerHTML = resultHTML;} </script> </body> </html>
